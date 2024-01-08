@@ -1,10 +1,13 @@
+
+// This file contains the Differentiator class, which is used 
+// to differentiate a single term according to the rules of calculus
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Differentiator {
 
-  // This is a method to differentiate a single mathematical term from a calculus
-  // equation
+  // This is a method to differentiate a single mathematical term
+  // from a calculus equation
   public static DifferentiableTerm differentiateTerm(DifferentiableTerm term) {
 
     // Extract the string representation and sign of the term
@@ -22,7 +25,7 @@ public class Differentiator {
     if (termStr.matches(".*sin\\(x\\).*") || termStr.matches(".*cos\\(x\\).*") || termStr.matches(".*tan\\(x\\).*")) {
       // If there is a match, delegate to a method that is made to handle
       // trigonometric differentiation
-      return differentiateTrigonometric(term);
+      return differentiateTrigonometricTerm(term);
     }
 
     // Use a regex to find terms with Euler's number and handle them
@@ -35,18 +38,20 @@ public class Differentiator {
     // Regex to handle power terms (in the format ax^b)
     // —————
     // Explanation:
-    // ——————————> ([\\d.]+)? | This captures a group of one or more digits or a
-    // decimal point
-    // (which is optional). This is the coefficient of x (like '2.5' in '2.5x').
+    // ——————————> ([\\d.]+)? |
+    // This captures a group of one or more digits, or a decimal point.
+    // This is the optional coefficient of x (like '2.5' in '2.5x').
     // —————
-    // ——————————> x | This matches the literal character 'x'.
+    // ——————————> x |
+    // This matches the literal character 'x'.
     // —————
-    // ——————————> (\\^([-\\d]+))? | This is a group that matches the
-    // power of x, if it exists. '\\^' matches the literal '^'. '([-\\d]+)' captures
-    // a group of one or more digits or a minus sign, allowing for negative powers
-    // (like '3' in 'x^3' or '-2' in 'x^-2'). So the regex effectively matches
-    // expresions like '2.5x', 'x^3', '3x^-2', or even just 'x' (which is handled
-    // above).
+    // ——————————> (\\^([-\\d]+))? |
+    // This is a group that matches the power of x, if it exists.
+    // '\\^' matches the literal '^', while '([-\\d]+)' captures
+    // a group of one or more digits or a minus sign, allowing for
+    // negative powers such as '3' in 'x^3' or '-2' in 'x^-2'.
+    // So the regex matches expresions like '2.5x', 'x^3', '3x^-2',
+    // as well as just 'x' (the power defaults to 1 if not present).
     Matcher matcher = Pattern.compile("([\\d.]+)?x(\\^([-\\d]+))?").matcher(termStr);
     if (matcher.find()) {
       // Parse the coefficient, defaulting to 1.0 if not present
@@ -70,7 +75,7 @@ public class Differentiator {
   }
 
   // Method to differentiate trigonometric functions
-  private static DifferentiableTerm differentiateTrigonometric(DifferentiableTerm term) {
+  private static DifferentiableTerm differentiateTrigonometricTerm(DifferentiableTerm term) {
 
     // Extract the string representation and sign of the term
     String termStr = term.getTerm();
@@ -94,7 +99,8 @@ public class Differentiator {
           differentiatedTerm = "cos(x)"; // Derivative of sin(x) is cos(x)
           break;
         case "cos":
-          differentiatedTerm = "-sin(x)"; // Derivative of cos(x) is -sin(x)
+          differentiatedTerm = "sin(x)"; // Derivative of cos(x) is -sin(x)
+          sign = sign.flip(); // Flip the sign to account for the negative
           break;
         case "tan":
           differentiatedTerm = "sec(x)^2"; // Derivative of tan(x) is sec(x)^2
@@ -105,8 +111,8 @@ public class Differentiator {
           throw new IllegalArgumentException("Unsupported trigonometric function");
       }
 
-      // If there was a coefficient, it needs to be multiplied with the differentiated
-      // term
+      // If there was a coefficient, it needs to be multiplied
+      // with the differentiated term
       if (coefficient != 1.0) {
         differentiatedTerm = coefficient + differentiatedTerm;
       }
@@ -142,7 +148,6 @@ public class Differentiator {
     }
   }
 
-  // Method to format a coefficient for output
   private static String formatCoefficient(double coefficient) {
     // Check if the coefficient is an integer value by comparing the coefficient to
     // its casted integer value. If the coefficient is 3.0, casting it to a long
